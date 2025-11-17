@@ -7,7 +7,6 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 import plotly.express as px
-import plotly.graph_objects as go
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import (
     accuracy_score, precision_score, recall_score, f1_score,
@@ -21,6 +20,14 @@ from sklearn.decomposition import PCA
 from mlxtend.frequent_patterns import apriori, association_rules
 from xgboost import XGBClassifier, XGBRegressor
 import matplotlib.pyplot as plt
+
+##############################################
+# PAGE CONFIG
+##############################################
+st.set_page_config(
+    page_title="AI–VR Fashion Intelligence Suite",
+    layout="wide"
+)
 
 ##############################################
 # PREMIUM GRADIENT THEME CSS
@@ -84,6 +91,7 @@ page = st.sidebar.radio(
     "Navigate",
     [
         "🏠 Home",
+        "🏢 Company Info",
         "📊 Data Overview",
         "🤖 Classification",
         "🌀 Clustering",
@@ -104,24 +112,170 @@ if page == "🏠 Home":
             background:linear-gradient(90deg,#A020F0,#00C9FF);
             border-radius:15px; color:white;'>
             <h1 style='font-size:50px;'>AI–VR Fashion Intelligence Suite</h1>
-            <h3>The Ultimate All-in-One ML + Pricing + Persona Dashboard</h3>
+            <h3>Data-Driven Insights for the AI–VR Fashion Platform</h3>
         </div>
     """, unsafe_allow_html=True)
 
     st.write("")
-    st.markdown("### 🚀 What This Dashboard Includes")
-    st.markdown("""
-    - ✔ Classification (LR, RF, XGBoost)  
-    - ✔ Clustering (KMeans, Hierarchical)  
-    - ✔ Association Rule Mining (Apriori)  
-    - ✔ Regression (LR, RF, GBR, XGBRegressor)  
-    - ✔ Dynamic Pricing Simulator  
-    - ✔ Persona Generator  
-    - ✔ Insights + Strategies  
-    - ✔ Data Upload + Download  
-    """)
+    col1, col2 = st.columns([2, 1])
+
+    with col1:
+        st.markdown("### 🚀 What This Dashboard Includes")
+        st.markdown("""
+        - ✔ Classification (Logistic Regression, Random Forest, XGBoost)  
+        - ✔ Clustering (KMeans, Agglomerative + PCA)  
+        - ✔ Association Rule Mining (Apriori)  
+        - ✔ Regression (Linear, RF, GBR, XGBoost Regressor)  
+        - ✔ Dynamic Pricing Simulator (scenario analysis)  
+        - ✔ Persona Generator (Fit Frustrated, Premium Perfectionist, Metaverse Native, etc.)  
+        - ✔ Insights aligned to survey results and business model  
+        - ✔ Data Upload + Download  
+        """)
+
+    # Company quick info card on Home
+    with col2:
+        st.markdown("""
+        <div style='padding:18px; border-radius:14px; background:#1b1b2f; border:1px solid #444;'>
+            <h4>🏢 AI–VR Fashion Platform</h4>
+            <p style='font-size:14px; line-height:1.4;'>
+            The platform takes a fashion idea from an online concept to a real garment through a 
+            four-step pipeline:
+            </p>
+            <ol style='font-size:13px;'>
+                <li><b>AI Design</b> – AI generates 3D outfit concepts and predicts trends.</li>
+                <li><b>VR Fitting</b> – Designers and users test fit, drape and movement in VR.</li>
+                <li><b>Digital to Physical</b> – 3D models are converted into precise 2D patterns.</li>
+                <li><b>Real Fit</b> – A physical garment is produced that matches the tuned virtual fit.</li>
+            </ol>
+            <p style='font-size:13px;'>
+            The promise: <b>Creative Freedom + Perfect Fit + Near Zero-Waste.</b>
+            </p>
+        </div>
+        """, unsafe_allow_html=True)
 
     st.markdown("---")
+
+##############################################
+# COMPANY INFO PAGE
+##############################################
+if page == "🏢 Company Info":
+    st.header("🏢 AI–VR Fashion Platform – Company Profile")
+
+    st.subheader("1. Business Concept")
+    st.markdown("""
+    The AI–VR Fashion Platform is designed to convert a customer's or designer's idea  
+    into a **real, perfectly fitted garment** using a fully digital pipeline.
+    Instead of relying on multiple physical samples, fit trials, and guesswork, the
+    system uses AI and VR to validate designs before a single piece of fabric is cut.
+    """)
+
+    st.subheader("2. Four-Step Process")
+    col1, col2 = st.columns(2)
+    with col1:
+        st.markdown("""
+        **Step 1 – AI Design**  
+        - AI helps create first-draft 3D designs and predicts trends.  
+        - Captures creative preferences and style choices.  
+
+        **Step 2 – VR Fitting**  
+        - Fit, drape and movement are tested on a virtual avatar in VR.  
+        - All corrections are made digitally (no fabric waste).  
+        """)
+    with col2:
+        st.markdown("""
+        **Step 3 – Digital to Physical**  
+        - The optimised 3D model is converted into an accurate 2D pattern.  
+        - This bridges the digital garment and the physical pattern.  
+
+        **Step 4 – Real Fit Production**  
+        - The final garment is manufactured to match the digital fit.  
+        - The result is a real outfit that mirrors the tuned virtual version.  
+        """)
+
+    st.subheader("3. Why This Is Useful")
+    st.markdown("""
+    The platform directly addresses three major pain points in fashion:
+
+    - **Unlimited Creativity & Customisation**  
+      Fashion-conscious, creative customers can convert their ideas into custom outfits
+      with AI support, instead of being limited to standard designs.
+
+    - **Fit Nightmare Solution**  
+      Customers who struggle with fit get a better and more reliable fit. This reduces  
+      returns for e-commerce and increases satisfaction.
+
+    - **Sustainability & Speed**  
+      Multiple virtual fittings replace physical samples, cutting fabric waste and
+      shortening the design cycle significantly.
+    """)
+
+    st.subheader("4. Unique Selling Proposition (USP)")
+    st.markdown("""
+    The USP combines:
+    - **Creative Freedom** – customers and designers co-create unique looks.  
+    - **Perfect Fit Guarantee** – fit is tested and tuned digitally before production.  
+    - **True Digital-First Production** – the 3D model is directly converted into a
+      2D pattern, aligning virtual and physical garments closely.
+    """)
+
+    st.subheader("5. Target Market & Key Personas")
+    st.markdown("""
+    Based on the survey and persona analysis, we focus on three primary personas:
+
+    - **Fit Frustrated (Prime Target)**  
+      - High importance of fit, high difficulty in finding the right fit.  
+      - Strong interest in a solution that can guarantee fit and reduce pain of returns.  
+
+    - **Premium Perfectionist**  
+      - Higher income and willingness to pay a premium.  
+      - Values quality, craftsmanship, and exclusivity.  
+
+    - **Metaverse Native**  
+      - Tech-comfortable, excited by AI, VR, and immersive experiences.  
+      - Strong interest in AI Design Suggestions and VR Try-On.
+
+    Initial focus: **high-price, fit-critical products** such as suits and blazers.
+    These categories have the highest willingness to pay and benefit most from perfect fit.
+    """)
+
+    st.subheader("6. Value Proposition")
+    st.markdown("""
+    > **"Bring Your Unique Vision to Life with Guaranteed Precision and Near Zero-Waste."**  
+
+    - For customers: tailor-made garments that match their creative vision and fit requirements.  
+    - For the planet: reduced fabric waste and more efficient production.  
+    """)
+
+    st.subheader("7. Why This Is a Strong Data Analytics Project")
+    st.markdown("""
+    The entire business model runs on data-driven decision making:
+
+    - **AI Design Data** – trends, style choices, and creative preferences feed into
+      models that refine design suggestions.  
+
+    - **VR Fit Data** – detailed fit and movement feedback is captured digitally and
+      used to improve pattern accuracy and reduce returns.  
+
+    - **Customer Behaviour Data** – survey responses about interest, price sensitivity,
+      feature preference, and persona type help decide which segments and products to
+      prioritise.
+
+    This is why the platform is an ideal use case for **classification, clustering,
+    association rule mining, and regression** to guide strategy, pricing, product
+    design, and rollout.
+    """)
+
+    st.subheader("8. Role of This Dashboard")
+    st.markdown("""
+    This Streamlit dashboard acts as a **decision cockpit** for the AI–VR Fashion Platform:
+
+    - Segments users (clustering)  
+    - Predicts interest or adoption (classification)  
+    - Estimates willingness to pay (regression)  
+    - Finds feature affinity patterns (association rules)  
+    - Simulates pricing and revenue (dynamic pricing)  
+    - Summarises insights into a business narrative (Insights tab)  
+    """)
 
 ##############################################
 # DATA OVERVIEW
@@ -168,8 +322,17 @@ if page == "🤖 Classification":
 
     if st.button("Train Model"):
 
+        if len(features) == 0:
+            st.error("Please select at least one feature column.")
+            st.stop()
+
         X = pd.get_dummies(df[features])
         y = df[target]
+
+        # Drop rows with missing values in X or y
+        data = pd.concat([X, y], axis=1).dropna()
+        X = data[X.columns]
+        y = data[target]
 
         X_train, X_test, y_train, y_test = train_test_split(
             X, y, test_size=test_size, random_state=42
@@ -180,7 +343,7 @@ if page == "🤖 Classification":
         elif model_choice == "Random Forest Classifier":
             model = RandomForestClassifier(n_estimators=200, random_state=42)
         else:
-            model = XGBClassifier(
+            model = XGBoostClassifier(
                 eval_metric="logloss",
                 use_label_encoder=False,
                 random_state=42
@@ -219,6 +382,10 @@ if page == "🌀 Clustering":
     )
 
     if st.button("Run Clustering"):
+
+        if len(clustering_features) == 0:
+            st.error("Please select at least one feature column for clustering.")
+            st.stop()
 
         X = df[clustering_features].dropna()
         scaler = StandardScaler()
@@ -281,17 +448,27 @@ if page == "🔗 Association Rule Mining":
                 download_button(rules, "association_rules.csv")
 
 ##############################################
-# REGRESSION
+# REGRESSION (NUMERIC-ONLY TARGET)
 ##############################################
 if page == "📈 Regression":
 
     st.header("📈 Regression Models")
 
-    target = st.selectbox("Target (Y)", df.columns)
-    reg_features = st.multiselect("Features (X)", df.columns, default=list(df.columns))
+    # Only allow numeric columns as valid targets for regression
+    numeric_cols = df.select_dtypes(include=[np.number]).columns
+    if len(numeric_cols) == 0:
+        st.error("No numeric columns available for regression. Please upload a dataset with numeric targets.")
+        st.stop()
 
-    if target in reg_features:
-        reg_features.remove(target)
+    target = st.selectbox("Target (Y - numeric only)", numeric_cols)
+
+    # Features can be any columns except the target
+    possible_features = [col for col in df.columns if col != target]
+    reg_features = st.multiselect(
+        "Features (X)",
+        possible_features,
+        default=possible_features
+    )
 
     reg_model_choice = st.selectbox(
         "Select Regression Algorithm",
@@ -303,13 +480,25 @@ if page == "📈 Regression":
 
     if st.button("Run Regression"):
 
-        X = pd.get_dummies(df[reg_features])
-        y = df[target]
+        if len(reg_features) == 0:
+            st.error("Please select at least one feature column.")
+            st.stop()
 
+        # Work on subset and drop rows with missing target/feature values
+        data = df[reg_features + [target]].dropna()
+        if data.empty:
+            st.error("No data left after dropping missing values. Check your selected columns.")
+            st.stop()
+
+        X = pd.get_dummies(data[reg_features])
+        y = data[target].astype(float)  # safe: target is numeric by construction
+
+        # Train-test split
         X_train, X_test, y_train, y_test = train_test_split(
             X, y, test_size=test_size, random_state=42
         )
 
+        # Model selection
         if reg_model_choice == "Linear Regression":
             model = LinearRegression()
         elif reg_model_choice == "Random Forest Regressor":
@@ -319,21 +508,27 @@ if page == "📈 Regression":
         else:
             model = XGBRegressor(objective="reg:squarederror", random_state=42)
 
+        # Fit model
         model.fit(X_train, y_train)
         preds = model.predict(X_test)
 
+        # Metrics
         st.subheader("Regression Metrics")
         st.write("R²:", r2_score(y_test, preds))
         st.write("RMSE:", np.sqrt(mean_squared_error(y_test, preds)))
         st.write("MAE:", mean_absolute_error(y_test, preds))
 
+        # Plot Actual vs Predicted
+        st.subheader("Actual vs Predicted")
         fig = px.scatter(
-            x=y_test, y=preds,
+            x=y_test,
+            y=preds,
             labels={"x": "Actual", "y": "Predicted"},
             trendline="ols"
         )
         st.plotly_chart(fig, use_container_width=True)
 
+        # Download predictions
         out = pd.DataFrame({"Actual": y_test, "Predicted": preds})
         download_button(out, "regression_predictions.csv")
 
@@ -385,23 +580,78 @@ if page == "🧬 Persona Generator":
     st.success(f"🎭 **Your Predicted Persona: {persona}**")
 
 ##############################################
-# INSIGHTS PAGE
+# INSIGHTS PAGE (ALIGNED TO REPORT)
 ##############################################
 if page == "📌 Insights":
 
-    st.header("📌 AI-Generated Insights & Strategy Recommendations")
+    st.header("📌 Key Insights from AI–VR Fashion Survey")
 
-    st.info("🔥 Target high WTP personas with premium AI–VR bundles.")
-    st.warning("⚠ Budget Conscious personas show weaker interest — avoid early targeting.")
-    st.success("✨ Metaverse Natives are ideal early adopters for immersive VR try-on.")
-
-    st.subheader("📌 Recommended Go-To-Market Strategy")
+    st.subheader("1. Persona Distribution & Interest")
     st.markdown("""
-    - Focus on **Premium Perfectionists** & **Metaverse Natives**  
-    - Lead with **VR Try-On + AI Fit Suggestions**  
-    - Build **sustainability and zero-waste stories** for Eco Warriors  
-    - Avoid heavy marketing spend on Budget Conscious personas initially  
-    - Offer tiered pricing with dynamic add-ons for advanced features  
+    - The largest persona groups are **Budget Conscious**, **Premium Perfectionist**, and **Fit Frustrated**.  
+    - **Eco Warrior** and **Metaverse Native** are smaller but still meaningful segments.  
+    - Metaverse Natives show the highest share of early adopters, while Fit Frustrated show very high overall interest, 
+      strongly supporting the idea of solving fit problems with AI–VR.
+    """)
+
+    st.subheader("2. Fit Importance vs Difficulty (Quadrant Insight)")
+    st.markdown("""
+    - Customers who rate fit as **very important and very difficult** are the **Prime Target**.  
+    - Many of these Prime Target users are also **extremely interested** in the concept.  
+    - Customers for whom fit is easy or not very important are lower priority segments for early rollout.
+    """)
+
+    st.subheader("3. Feature Preference – Heatmap Learnings")
+    st.markdown("""
+    - **Custom Fit Guarantee** is the most attractive feature overall, especially for Eco Warriors, 
+      Fit Frustrated and Premium Perfectionists.  
+    - **AI Design Suggestions** and **VR Try-On** are highly valued by Metaverse Natives and Premium Perfectionists.  
+    - Budget Conscious users score features lower on average, signalling price sensitivity.
+    """)
+
+    st.subheader("4. Willingness to Pay by Persona")
+    st.markdown("""
+    - Across categories, people are willing to pay much more for **Suits/Blazers** than for basic items.  
+    - **Premium Perfectionist** and **Fit Frustrated** are willing to pay the highest amounts for suits/blazers 
+      (extending into the very high-price range).  
+    - **Budget Conscious** prefer lower price points, especially for premium items, indicating they are not the 
+      core target for top-tier offerings.
+    """)
+
+    st.subheader("5. Customer Journey Funnel")
+    st.markdown("""
+    - A large share of respondents report **fit issues** and are **tech comfortable**, validating the problem and 
+      feasibility of a tech-based solution.  
+    - A high fraction of tech-comfortable users are **curious about the concept**.  
+    - Almost half of interested customers are **willing to pay a premium**, and a significant subset want **beta access**, 
+      indicating a strong early adopter pool.
+    """)
+
+    st.subheader("6. Purchase Factor Impact on Interest")
+    st.markdown("""
+    - Positive drivers of interest: **Unique Custom Designs**, **Perfect Fit**, **Made-to-Order/Personalisation**, 
+      and elements like sustainability and ethical manufacturing.  
+    - The strongest negative driver is **Price/Value concern**: if the product feels too expensive, interest drops.  
+    - Comfort, durability, and versatility also slightly reduce interest where customers fear a 'digital' process 
+      might compromise these aspects.
+    """)
+
+    st.subheader("7. Strategic Takeaways")
+    st.markdown("""
+    - **Primary Targets:**  
+      - Fit Frustrated (pain-driven)  
+      - Premium Perfectionist (willing to pay)  
+      - Metaverse Native (tech excitement & advocacy)  
+
+    - **Product Focus:**  
+      - High-impact categories like **Suits/Blazers** with a strong **Custom Fit Guarantee**.  
+
+    - **Positioning:**  
+      - Lead with Personalized Fit + Unique Design + Zero-Waste Story.  
+      - Justify premium pricing by clearly explaining the value and long-term benefits.  
+
+    - **Risk Area:**  
+      - Budget Conscious segment remains price sensitive; they may need stripped-down offerings or basic tiers.
     """)
 
 ##############################################
