@@ -1,24 +1,13 @@
-"""
-AI–VR Fashion Intelligence Suite
-Single-file Streamlit app with:
-- Data upload + local fallback
-- Classification (LR, RF, XGBoost)
-- Clustering (KMeans, Agglomerative)
-- Association Rules (Apriori)
-- Regression (LR, RF, GBR, XGBoost)
-- Dynamic pricing simulator
-- Persona generator
-- Downloadable outputs
-"""
+##############################################
+#        AI–VR FASHION INTELLIGENCE SUITE
+#                FINAL app.py
+##############################################
 
 import streamlit as st
 import pandas as pd
 import numpy as np
 import plotly.express as px
 import plotly.graph_objects as go
-from io import BytesIO
-
-# ML imports
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import (
     accuracy_score, precision_score, recall_score, f1_score,
@@ -30,399 +19,396 @@ from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor, Grad
 from sklearn.cluster import KMeans, AgglomerativeClustering
 from sklearn.decomposition import PCA
 from mlxtend.frequent_patterns import apriori, association_rules
+from xgboost import XGBClassifier, XGBRegressor
+import matplotlib.pyplot as plt
 
-# XGBoost (optional, in requirements)
-try:
-    from xgboost import XGBClassifier, XGBRegressor
-    _HAS_XGB = True
-except Exception:
-    _HAS_XGB = False
-
-# ---------------------------
-# Styling (premium gradient)
-# ---------------------------
-PAGE_STYLE = """
+##############################################
+# PREMIUM GRADIENT THEME CSS
+##############################################
+GRADIENT_STYLE = """
 <style>
 body {
-  background: linear-gradient(135deg,#0f172a 0%, #0b1220 50%, #071021 100%);
-  color: #f1f5f9;
-}
-.stButton>button {
-  background-color: #7c3aed;
-  color: white;
+    background: linear-gradient(135deg, #1c1c29 0%, #202040 50%, #1a1a2e 100%);
+    color: white !important;
 }
 .sidebar .sidebar-content {
-  background: linear-gradient(180deg,#061026,#071836);
-  color: #e6eef8;
+    background-color: #1b1b2f !important;
 }
-h1, h2, h3, h4 { color: #e6eef8; }
 </style>
 """
-st.markdown(PAGE_STYLE, unsafe_allow_html=True)
 
-# ---------------------------
-# Helpers
-# ---------------------------
-def to_csv_bytes(df: pd.DataFrame) -> bytes:
-    return df.to_csv(index=False).encode()
+st.markdown(GRADIENT_STYLE, unsafe_allow_html=True)
 
-def download_df(df: pd.DataFrame, filename: str):
-    st.download_button(label=f"Download {filename}", data=to_csv_bytes(df), file_name=filename, mime="text/csv")
+##############################################
+# DOWNLOAD BUTTON UTILITY
+##############################################
+def download_button(df, filename):
+    csv = df.to_csv(index=False).encode()
+    st.download_button(
+        label=f"📥 Download {filename}",
+        data=csv,
+        file_name=filename,
+        mime="text/csv"
+    )
 
-# ---------------------------
-# Data loader
-# ---------------------------
-st.sidebar.header("Data Loader")
-uploaded = st.sidebar.file_uploader("Upload CSV (optional)", type=["csv"])
-
-# local fallback path (user said dataset is already downloaded). Update if your path differs.
-local_default_path = "/mnt/data/AI_VR_Fashion_Survey_Synthetic_Data (1).csv"
-
+##############################################
+# DATA LOADERS (UPLOAD + LOCAL DEFAULT CSV)
+##############################################
 @st.cache_data
-def load_default():
-    # Try uploaded first (handled outside), then local path, then try a neutral empty df
-    try:
-        df_local = pd.read_csv(local_default_path)
-        return df_local
-    except Exception:
-        return pd.DataFrame()
+def load_default_data():
+    """
+    Loads the default AI–VR Fashion Survey dataset.
+    Make sure the file:
+    'AI_VR_Fashion_Survey_Synthetic_Data (1).csv'
+    is in the same folder as this app.py.
+    """
+    return pd.read_csv("AI_VR_Fashion_Survey_Synthetic_Data (1).csv")
+
+st.sidebar.header("📁 Dataset Loader")
+
+uploaded = st.sidebar.file_uploader("Upload your CSV", type=["csv"])
 
 if uploaded:
     df = pd.read_csv(uploaded)
 else:
-    df = load_default()
-    if df.empty:
-        st.sidebar.warning("No local dataset found. Please upload CSV or place dataset at:\n" + local_default_path)
+    df = load_default_data()
 
-# stop if still empty
-if df is None or df.empty:
-    st.title("AI–VR Fashion Intelligence Suite")
-    st.error("No data loaded. Upload a CSV using the sidebar or place default dataset at the path shown in the sidebar.")
+if df.empty:
+    st.error("❌ No dataset available. Upload a CSV file or ensure the default CSV is present.")
     st.stop()
 
-# ---------------------------
-# Navigation
-# ---------------------------
-st.sidebar.markdown("---")
-page = st.sidebar.radio("Navigate", [
-    "Home",
-    "Data Overview",
-    "Classification",
-    "Clustering",
-    "Association Rules (ARM)",
-    "Regression",
-    "Dynamic Pricing",
-    "Persona Generator",
-    "Insights"
-])
+##############################################
+# NAVIGATION
+##############################################
+page = st.sidebar.radio(
+    "Navigate",
+    [
+        "🏠 Home",
+        "📊 Data Overview",
+        "🤖 Classification",
+        "🌀 Clustering",
+        "🔗 Association Rule Mining",
+        "📈 Regression",
+        "💰 Dynamic Pricing",
+        "🧬 Persona Generator",
+        "📌 Insights"
+    ]
+)
 
-# ---------------------------
-# HOME
-# ---------------------------
-if page == "Home":
-    st.title("AI–VR Fashion Intelligence Suite")
+##############################################
+# HOME PAGE
+##############################################
+if page == "🏠 Home":
     st.markdown("""
-    This dashboard bundles ML models (classification, clustering, regression), association rule mining,
-    a dynamic pricing simulator, persona generation and downloadable outputs — all in one Streamlit app.
+        <div style='text-align:center; padding:40px;
+            background:linear-gradient(90deg,#A020F0,#00C9FF);
+            border-radius:15px; color:white;'>
+            <h1 style='font-size:50px;'>AI–VR Fashion Intelligence Suite</h1>
+            <h3>The Ultimate All-in-One ML + Pricing + Persona Dashboard</h3>
+        </div>
+    """, unsafe_allow_html=True)
+
+    st.write("")
+    st.markdown("### 🚀 What This Dashboard Includes")
+    st.markdown("""
+    - ✔ Classification (LR, RF, XGBoost)  
+    - ✔ Clustering (KMeans, Hierarchical)  
+    - ✔ Association Rule Mining (Apriori)  
+    - ✔ Regression (LR, RF, GBR, XGBRegressor)  
+    - ✔ Dynamic Pricing Simulator  
+    - ✔ Persona Generator  
+    - ✔ Insights + Strategies  
+    - ✔ Data Upload + Download  
     """)
-    st.markdown("**Dataset:**")
-    st.write(f"Rows: {df.shape[0]}, Columns: {df.shape[1]}")
-    if st.button("Preview dataset (first 10 rows)"):
-        st.dataframe(df.head(10))
-    st.markdown("---")
-    st.markdown("**Quick start:** use **Data Overview** to inspect data, then choose an analysis tab.")
+
     st.markdown("---")
 
-# ---------------------------
+##############################################
 # DATA OVERVIEW
-# ---------------------------
-elif page == "Data Overview":
-    st.title("Data Overview")
-    st.subheader("Preview")
-    st.dataframe(df.head(10))
-    st.subheader("Shape & Types")
+##############################################
+if page == "📊 Data Overview":
+
+    st.header("📊 Dataset Overview")
+
+    st.subheader("Preview Data")
+    st.dataframe(df.head())
+
+    st.subheader("Shape")
     st.write(df.shape)
-    st.write(df.dtypes)
-    st.subheader("Missing values")
-    st.write(df.isnull().sum().sort_values(ascending=False).head(30))
-    st.subheader("Summary statistics (numeric)")
-    st.write(df.describe().T)
-    st.markdown("---")
-    download_df(df, "data_overview_download.csv")
 
-# ---------------------------
+    st.subheader("Missing Values")
+    st.write(df.isnull().sum())
+
+    st.subheader("Summary Stats")
+    st.write(df.describe(include="all"))
+
+    st.subheader("📥 Download Dataset")
+    download_button(df, "dataset_download.csv")
+
+##############################################
 # CLASSIFICATION
-# ---------------------------
-elif page == "Classification":
-    st.title("Classification")
-    st.markdown("Select columns and model to build a classifier.")
+##############################################
+if page == "🤖 Classification":
 
-    # select target and features
-    target = st.selectbox("Target column (y)", df.columns)
-    possible_features = [c for c in df.columns if c != target]
-    features = st.multiselect("Feature columns (X) — if none selected, numerical columns will be used", possible_features,
-                              default=[c for c in df.select_dtypes(include=np.number).columns if c != target])
+    st.header("🤖 Classification Models")
 
-    if not features:
-        st.warning("No features selected — please choose at least one feature.")
-    else:
-        model_choice = st.selectbox("Model", ["Logistic Regression", "Random Forest", "XGBoost (if available)"])
-        test_size = st.slider("Test size (%)", 10, 50, 20) / 100.0
+    target = st.selectbox("Target Column", df.columns)
+    features = st.multiselect("Feature Columns", df.columns, default=list(df.columns))
 
-        if st.button("Train classifier"):
-            # Prepare dataset
-            X = df[features].copy()
-            y = df[target].copy()
+    if target in features:
+        features.remove(target)
 
-            # Basic preprocessing: drop NA rows for simplicity
-            data = pd.concat([X, y], axis=1).dropna()
-            X = pd.get_dummies(data[features])
-            y = data[target]
+    model_choice = st.selectbox("Choose Algorithm", [
+        "Logistic Regression",
+        "Random Forest Classifier",
+        "XGBoost Classifier"
+    ])
 
-            X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=test_size, random_state=42)
+    test_size = st.slider("Test Split %", 0.1, 0.5, 0.2)
 
-            # Model selection
-            if model_choice == "Logistic Regression":
-                model = LogisticRegression(max_iter=1000)
-            elif model_choice == "Random Forest":
-                model = RandomForestClassifier(n_estimators=200, random_state=42)
-            else:
-                if _HAS_XGB:
-                    model = XGBClassifier(use_label_encoder=False, eval_metric="logloss", random_state=42)
-                else:
-                    st.warning("XGBoost not available — falling back to Random Forest")
-                    model = RandomForestClassifier(n_estimators=200, random_state=42)
+    if st.button("Train Model"):
 
-            model.fit(X_train, y_train)
-            preds = model.predict(X_test)
+        X = pd.get_dummies(df[features])
+        y = df[target]
 
-            # Metrics
-            st.subheader("Metrics")
-            st.write("Accuracy:", accuracy_score(y_test, preds))
-            st.write("Precision:", precision_score(y_test, preds, average="weighted", zero_division=0))
-            st.write("Recall:", recall_score(y_test, preds, average="weighted", zero_division=0))
-            st.write("F1 score:", f1_score(y_test, preds, average="weighted", zero_division=0))
+        X_train, X_test, y_train, y_test = train_test_split(
+            X, y, test_size=test_size, random_state=42
+        )
 
-            st.subheader("Confusion matrix")
-            cm = confusion_matrix(y_test, preds)
-            st.write(cm)
-
-            # Show a small results table and download
-            results = pd.DataFrame({"Actual": y_test, "Predicted": preds}).reset_index(drop=True)
-            st.dataframe(results.head(50))
-            download_df(results, "classification_results.csv")
-
-# ---------------------------
-# CLUSTERING
-# ---------------------------
-elif page == "Clustering":
-    st.title("Clustering")
-    st.markdown("Choose numeric features and clustering algorithm.")
-
-    numeric_cols = list(df.select_dtypes(include=np.number).columns)
-    if not numeric_cols:
-        st.error("No numeric features available for clustering.")
-    else:
-        cluster_features = st.multiselect("Numeric features for clustering", numeric_cols, default=numeric_cols[:4])
-        n_clusters = st.slider("Number of clusters (k)", 2, 12, 3)
-        method = st.selectbox("Method", ["KMeans", "Agglomerative"])
-
-        if st.button("Run clustering"):
-            X = df[cluster_features].dropna()
-            scaler = StandardScaler()
-            Xs = scaler.fit_transform(X)
-
-            if method == "KMeans":
-                model = KMeans(n_clusters=n_clusters, random_state=42)
-                labels = model.fit_predict(Xs)
-            else:
-                model = AgglomerativeClustering(n_clusters=n_clusters)
-                labels = model.fit_predict(Xs)
-
-            df_clusters = df.loc[X.index].copy()
-            df_clusters["cluster"] = labels
-
-            st.subheader("Cluster counts")
-            st.write(df_clusters["cluster"].value_counts().sort_index())
-
-            # PCA 2D
-            pca = PCA(n_components=2)
-            comp = pca.fit_transform(Xs)
-            df_clusters["pc1"], df_clusters["pc2"] = comp[:, 0], comp[:, 1]
-            fig = px.scatter(df_clusters, x="pc1", y="pc2", color="cluster", hover_data=df_clusters.columns)
-            st.plotly_chart(fig, use_container_width=True)
-
-            download_df(df_clusters, "clustered_dataset.csv")
-
-# ---------------------------
-# ASSOCIATION RULES (ARM)
-# ---------------------------
-elif page == "Association Rules (ARM)":
-    st.title("Association Rule Mining (Apriori)")
-    st.markdown("Select categorical columns (discrete choices) for basket-style analysis.")
-
-    cat_cols = st.multiselect("Categorical columns", [c for c in df.columns if df[c].dtype == "object"], default=[c for c in df.columns if df[c].dtype == "object"][:6])
-    min_support = st.slider("Min support", 0.01, 0.5, 0.05)
-    min_confidence = st.slider("Min confidence", 0.1, 1.0, 0.5)
-    min_lift = st.slider("Min lift", 0.5, 5.0, 1.0)
-
-    if st.button("Run Apriori"):
-        if not cat_cols:
-            st.error("Pick at least one categorical column.")
+        if model_choice == "Logistic Regression":
+            model = LogisticRegression(max_iter=500)
+        elif model_choice == "Random Forest Classifier":
+            model = RandomForestClassifier(n_estimators=200, random_state=42)
         else:
-            # One-hot encoding for apriori
-            df_cat = df[cat_cols].fillna("NA").astype(str)
-            df_hot = pd.get_dummies(df_cat)
+            model = XGBClassifier(
+                eval_metric="logloss",
+                use_label_encoder=False,
+                random_state=42
+            )
 
-            freq = apriori(df_hot, min_support=min_support, use_colnames=True)
-            rules = association_rules(freq, metric="confidence", min_threshold=min_confidence)
-            rules = rules[rules["lift"] >= min_lift].sort_values(["confidence", "lift"], ascending=False)
+        model.fit(X_train, y_train)
+        preds = model.predict(X_test)
 
+        st.subheader("📊 Classification Metrics")
+        st.write("Accuracy:", accuracy_score(y_test, preds))
+        st.write("Precision:", precision_score(y_test, preds, average="weighted", zero_division=0))
+        st.write("Recall:", recall_score(y_test, preds, average="weighted", zero_division=0))
+        st.write("F1 Score:", f1_score(y_test, preds, average="weighted", zero_division=0))
+
+        cm = confusion_matrix(y_test, preds)
+        st.subheader("Confusion Matrix")
+        st.write(cm)
+
+        out = pd.DataFrame({"Actual": y_test, "Predicted": preds})
+        download_button(out, "classification_predictions.csv")
+
+##############################################
+# CLUSTERING
+##############################################
+if page == "🌀 Clustering":
+
+    st.header("🌀 Clustering Models")
+
+    num_clusters = st.slider("Number of Clusters (KMeans)", 2, 10, 3)
+    method = st.selectbox("Clustering Method", ["KMeans", "Agglomerative"])
+
+    clustering_features = st.multiselect(
+        "Select features for clustering",
+        df.columns,
+        default=list(df.select_dtypes(include=[np.number]).columns)
+    )
+
+    if st.button("Run Clustering"):
+
+        X = df[clustering_features].dropna()
+        scaler = StandardScaler()
+        X_scaled = scaler.fit_transform(X)
+
+        if method == "KMeans":
+            model = KMeans(n_clusters=num_clusters, random_state=42)
+        else:
+            model = AgglomerativeClustering(n_clusters=num_clusters)
+
+        df["Cluster"] = model.fit_predict(X_scaled)
+
+        st.subheader("Cluster Assigned Data")
+        st.dataframe(df.head())
+
+        # PCA 2D Visualization
+        pca = PCA(n_components=2)
+        comps = pca.fit_transform(X_scaled)
+        df["PC1"], df["PC2"] = comps[:, 0], comps[:, 1]
+
+        st.subheader("2D Cluster Visualization")
+        fig = px.scatter(df, x="PC1", y="PC2", color="Cluster", hover_data=clustering_features)
+        st.plotly_chart(fig, use_container_width=True)
+
+        download_button(df, "clustered_data.csv")
+
+##############################################
+# ASSOCIATION RULE MINING
+##############################################
+if page == "🔗 Association Rule Mining":
+
+    st.header("🔗 Association Rule Mining — Apriori Algorithm")
+
+    categorical_cols = st.multiselect(
+        "Select Categorical Columns",
+        df.columns,
+        default=[col for col in df.columns if df[col].dtype == "object"]
+    )
+
+    min_support = st.slider("Min Support", 0.01, 0.5, 0.05)
+    min_conf = st.slider("Min Confidence", 0.1, 1.0, 0.5)
+    min_lift = st.slider("Min Lift", 0.5, 5.0, 1.0)
+
+    if st.button("Generate Rules"):
+
+        if not categorical_cols:
+            st.error("Please select at least one categorical column.")
+        else:
+            df_hot = pd.get_dummies(df[categorical_cols])
+
+            freq_items = apriori(df_hot, min_support=min_support, use_colnames=True)
+            rules = association_rules(freq_items, metric="confidence", min_threshold=min_conf)
+            rules = rules[rules["lift"] >= min_lift]
+
+            st.subheader("Generated Rules")
             if rules.empty:
-                st.warning("No rules found for the given thresholds.")
+                st.warning("No rules found with the selected thresholds.")
             else:
-                st.subheader("Rules")
                 st.dataframe(rules)
-                download_df(rules, "association_rules.csv")
+                download_button(rules, "association_rules.csv")
 
-# ---------------------------
+##############################################
 # REGRESSION
-# ---------------------------
-elif page == "Regression":
-    st.title("Regression")
-    st.markdown("Select numeric target and features for regression models.")
+##############################################
+if page == "📈 Regression":
 
-    numeric_cols = list(df.select_dtypes(include=np.number).columns)
-    if not numeric_cols:
-        st.error("No numeric columns available for regression.")
-    else:
-        target = st.selectbox("Target (y)", numeric_cols)
-        features = st.multiselect("Features (X)", [c for c in numeric_cols if c != target], default=[c for c in numeric_cols if c != target][:5])
+    st.header("📈 Regression Models")
 
-        model_choice = st.selectbox("Model", ["Linear Regression", "Random Forest Regressor", "Gradient Boosting Regressor", "XGBoost Regressor"])
-        test_size = st.slider("Test size (%)", 10, 50, 20) / 100.0
+    target = st.selectbox("Target (Y)", df.columns)
+    reg_features = st.multiselect("Features (X)", df.columns, default=list(df.columns))
 
-        if st.button("Train regression"):
-            X = df[features].dropna()
-            y = df.loc[X.index, target]
+    if target in reg_features:
+        reg_features.remove(target)
 
-            X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=test_size, random_state=42)
+    reg_model_choice = st.selectbox(
+        "Select Regression Algorithm",
+        ["Linear Regression", "Random Forest Regressor",
+         "Gradient Boosting Regressor", "XGBoost Regressor"]
+    )
 
-            if model_choice == "Linear Regression":
-                model = LinearRegression()
-            elif model_choice == "Random Forest Regressor":
-                model = RandomForestRegressor(n_estimators=300, random_state=42)
-            elif model_choice == "Gradient Boosting Regressor":
-                model = GradientBoostingRegressor(random_state=42)
-            else:
-                if _HAS_XGB:
-                    model = XGBRegressor(objective="reg:squarederror", random_state=42)
-                else:
-                    st.warning("XGBoost not available — falling back to Random Forest")
-                    model = RandomForestRegressor(n_estimators=300, random_state=42)
+    test_size = st.slider("Test Size (%)", 0.1, 0.5, 0.2)
 
-            model.fit(X_train, y_train)
-            preds = model.predict(X_test)
+    if st.button("Run Regression"):
 
-            st.subheader("Metrics")
-            st.write("R²:", r2_score(y_test, preds))
-            st.write("RMSE:", np.sqrt(mean_squared_error(y_test, preds)))
-            st.write("MAE:", mean_absolute_error(y_test, preds))
+        X = pd.get_dummies(df[reg_features])
+        y = df[target]
 
-            fig = px.scatter(x=y_test, y=preds, labels={"x": "Actual", "y": "Predicted"})
-            st.plotly_chart(fig, use_container_width=True)
+        X_train, X_test, y_train, y_test = train_test_split(
+            X, y, test_size=test_size, random_state=42
+        )
 
-            out = pd.DataFrame({"Actual": y_test, "Predicted": preds})
-            download_df(out, "regression_predictions.csv")
+        if reg_model_choice == "Linear Regression":
+            model = LinearRegression()
+        elif reg_model_choice == "Random Forest Regressor":
+            model = RandomForestRegressor(n_estimators=300, random_state=42)
+        elif reg_model_choice == "Gradient Boosting Regressor":
+            model = GradientBoostingRegressor(random_state=42)
+        else:
+            model = XGBRegressor(objective="reg:squarederror", random_state=42)
 
-# ---------------------------
+        model.fit(X_train, y_train)
+        preds = model.predict(X_test)
+
+        st.subheader("Regression Metrics")
+        st.write("R²:", r2_score(y_test, preds))
+        st.write("RMSE:", np.sqrt(mean_squared_error(y_test, preds)))
+        st.write("MAE:", mean_absolute_error(y_test, preds))
+
+        fig = px.scatter(
+            x=y_test, y=preds,
+            labels={"x": "Actual", "y": "Predicted"},
+            trendline="ols"
+        )
+        st.plotly_chart(fig, use_container_width=True)
+
+        out = pd.DataFrame({"Actual": y_test, "Predicted": preds})
+        download_button(out, "regression_predictions.csv")
+
+##############################################
 # DYNAMIC PRICING
-# ---------------------------
-elif page == "Dynamic Pricing":
-    st.title("Dynamic Pricing Simulator")
+##############################################
+if page == "💰 Dynamic Pricing":
 
-    st.markdown("Adjust cost, margins and persona multipliers to see recommended price and revenue projections.")
+    st.header("💰 Dynamic Pricing Simulator")
 
-    cost = st.slider("Cost ($)", 5, 500, 60)
-    margin_pct = st.slider("Base margin (%)", 1, 200, 40)
-    persona_adj_pct = st.slider("Persona multiplier (%)", 50, 200, 100)
-    feature_addon = st.slider("Feature add-on ($)", 0, 300, 50)
+    cost = st.slider("Product Cost ($)", 10, 300, 60)
+    base_margin = st.slider("Base Margin (%)", 5, 80, 30)
+    persona_factor = st.slider("Persona Multiplier (%)", 80, 150, 100)
+    features_addon = st.slider("AI Feature Add-on ($)", 0, 200, 50)
 
-    price = cost * (1 + margin_pct / 100.0) * (persona_adj_pct / 100.0) + feature_addon
-    st.success(f"Recommended price: ${price:0.2f}")
+    dynamic_price = cost * (1 + base_margin / 100) * (persona_factor / 100) + features_addon
 
-    units = st.slider("Simulate units sold", 10, 1000, 100)
-    revenue = price * units
-    st.write(f"Projected revenue for {units} units: ${revenue:0.2f}")
+    st.success(f"💲 **Recommended Dynamic Price: ${dynamic_price:.2f}**")
 
-    # sensitivity chart
-    price_range = np.linspace(max(1, cost*0.8), cost*3, 50)
-    revenue_curve = price_range * units
-    fig = px.line(x=price_range, y=revenue_curve, labels={"x": "Price", "y": "Revenue"})
+    units = np.arange(10, 201, 10)
+    revenue = units * dynamic_price
+
+    fig = px.line(x=units, y=revenue, labels={"x": "Units Sold", "y": "Revenue ($)"})
     st.plotly_chart(fig, use_container_width=True)
 
-# ---------------------------
+##############################################
 # PERSONA GENERATOR
-# ---------------------------
-elif page == "Persona Generator":
-    st.title("Persona Generator")
-    st.markdown("Use sliders to synthesize a persona and see the recommended marketing pitch.")
+##############################################
+if page == "🧬 Persona Generator":
 
-    fit_importance = st.slider("Fit importance (1-10)", 1, 10, 7)
-    fit_difficulty = st.slider("Fit difficulty (1-10)", 1, 10, 6)
-    tech_comfort = st.slider("Tech comfort (1-10)", 1, 10, 6)
-    sustainability = st.slider("Sustainability preference (1-10)", 1, 10, 5)
-    budget = st.slider("Budget sensitivity (1-10)", 1, 10, 5)
+    st.header("🧬 AI–VR Persona Generator")
 
-    # simple rule-based persona mapping
-    if tech_comfort >= 8 and fit_importance >= 7:
-        persona = "Metaverse Native"
-        pitch = "Emphasize VR try-on, digital wardrobe, early-access perks."
-    elif fit_importance >= 8 and fit_difficulty >= 7:
-        persona = "Fit Frustrated"
-        pitch = "Lead with Perfect-Fit Guarantee and made-to-order personalization."
-    elif sustainability >= 8:
-        persona = "Eco Warrior"
-        pitch = "Highlight zero-waste production and eco-friendly materials."
-    elif budget >= 8 or budget <= 3:
-        persona = "Budget Conscious"
-        pitch = "Promote value-based essentials and low-commitment try-before-you-buy."
-    else:
+    fit_score = st.slider("Fit Importance (1–10)", 1, 10, 5)
+    tech_score = st.slider("Tech Comfort (1–10)", 1, 10, 5)
+    budget = st.slider("Budget Level (1–5)", 1, 5, 3)
+    trendiness = st.slider("Trend Affinity (1–10)", 1, 10, 5)
+
+    if fit_score >= 8 and tech_score >= 7:
         persona = "Premium Perfectionist"
-        pitch = "Showcase premium fabrics, bespoke tailoring, and premium pricing options."
-
-    st.markdown(f"### Persona: **{persona}**")
-    st.write(pitch)
-    st.markdown("---")
-
-# ---------------------------
-# INSIGHTS
-# ---------------------------
-elif page == "Insights":
-    st.title("Insights & Recommendations")
-    st.markdown("Auto-generated recommendations based on data and models.")
-
-    # Quick computed signals (basic)
-    if "InterestScore" in df.columns:
-        top_persona = df.groupby("Persona")["InterestScore"].mean().idxmax() if "Persona" in df.columns else None
+    elif fit_score >= 7 and budget <= 3:
+        persona = "Fit Frustrated"
+    elif tech_score >= 8 and trendiness >= 7:
+        persona = "Metaverse Native"
+    elif budget == 1:
+        persona = "Budget Conscious"
     else:
-        top_persona = df["Persona"].mode()[0] if "Persona" in df.columns else None
+        persona = "Eco Warrior"
 
-    st.subheader("Key signals")
-    if top_persona:
-        st.write(f"- Highest interest persona (by average interest score): **{top_persona}**")
-    st.write("- Top positive drivers to evaluate: Perfect Fit, Personalization, Sustainability (use Q17_... columns).")
-    st.write("- Primary risk: price sensitivity among Budget Conscious segment.")
+    st.success(f"🎭 **Your Predicted Persona: {persona}**")
 
-    st.markdown("### Suggested next steps")
-    st.write("""
-    1. Run clustering to identify highest-LTV segments.  
-    2. Run regression to estimate WTP and set dynamic prices for suits/blazers.  
-    3. Use classification to find likely early adopters for beta testing.  
+##############################################
+# INSIGHTS PAGE
+##############################################
+if page == "📌 Insights":
+
+    st.header("📌 AI-Generated Insights & Strategy Recommendations")
+
+    st.info("🔥 Target high WTP personas with premium AI–VR bundles.")
+    st.warning("⚠ Budget Conscious personas show weaker interest — avoid early targeting.")
+    st.success("✨ Metaverse Natives are ideal early adopters for immersive VR try-on.")
+
+    st.subheader("📌 Recommended Go-To-Market Strategy")
+    st.markdown("""
+    - Focus on **Premium Perfectionists** & **Metaverse Natives**  
+    - Lead with **VR Try-On + AI Fit Suggestions**  
+    - Build **sustainability and zero-waste stories** for Eco Warriors  
+    - Avoid heavy marketing spend on Budget Conscious personas initially  
+    - Offer tiered pricing with dynamic add-ons for advanced features  
     """)
 
-# ---------------------------
-# Footer
-# ---------------------------
+##############################################
+# FOOTER
+##############################################
 st.markdown("---")
-st.markdown("<p style='text-align:center; color:gray;'>AI–VR Fashion Intelligence Suite • Built with Streamlit</p>", unsafe_allow_html=True)
+st.markdown(
+    "<p style='text-align:center; color:gray;'>AI–VR Fashion ML Suite • Built with Streamlit</p>",
+    unsafe_allow_html=True
+)
