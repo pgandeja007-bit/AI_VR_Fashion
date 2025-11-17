@@ -1,5 +1,5 @@
 ##############################################
-#        AI–VR FASHION INTELLIGENCE SUITE
+#        Meta Fashion – AI–VR ML Dashboard
 #                FINAL app.py
 ##############################################
 
@@ -25,7 +25,7 @@ import matplotlib.pyplot as plt
 # PAGE CONFIG
 ##############################################
 st.set_page_config(
-    page_title="AI–VR Fashion Intelligence Suite",
+    page_title="Meta Fashion – AI–VR Fashion Intelligence Suite",
     layout="wide"
 )
 
@@ -91,7 +91,7 @@ page = st.sidebar.radio(
     "Navigate",
     [
         "🏠 Home",
-        "🏢 Company Info",
+        "🏢 Meta Fashion Info",
         "📊 Data Overview",
         "🤖 Classification",
         "🌀 Clustering",
@@ -111,8 +111,8 @@ if page == "🏠 Home":
         <div style='text-align:center; padding:40px;
             background:linear-gradient(90deg,#A020F0,#00C9FF);
             border-radius:15px; color:white;'>
-            <h1 style='font-size:50px;'>AI–VR Fashion Intelligence Suite</h1>
-            <h3>Data-Driven Insights for the AI–VR Fashion Platform</h3>
+            <h1 style='font-size:50px;'>Meta Fashion – AI–VR Fashion Intelligence Suite</h1>
+            <h3>Data-Driven Insights for an AI–VR Powered Fashion Brand</h3>
         </div>
     """, unsafe_allow_html=True)
 
@@ -132,23 +132,23 @@ if page == "🏠 Home":
         - ✔ Data Upload + Download  
         """)
 
-    # Company quick info card on Home
+    # Company quick info card on Home (fixed colors + Meta Fashion)
     with col2:
         st.markdown("""
-        <div style='padding:18px; border-radius:14px; background:#1b1b2f; border:1px solid #444;'>
-            <h4>🏢 AI–VR Fashion Platform</h4>
-            <p style='font-size:14px; line-height:1.4;'>
-            The platform takes a fashion idea from an online concept to a real garment through a 
-            four-step pipeline:
+        <div style='padding:18px; border-radius:14px; background:#252545; border:1px solid #555; color:#f5f5f5;'>
+            <h4 style='color:#ffffff; margin-bottom:8px;'>🏢 Meta Fashion</h4>
+            <p style='font-size:14px; line-height:1.4; color:#f5f5f5;'>
+            Meta Fashion is an <b>AI–VR fashion platform</b> that turns any outfit idea into a 
+            real, perfectly fitted garment through a fully digital pipeline:
             </p>
-            <ol style='font-size:13px;'>
-                <li><b>AI Design</b> – AI generates 3D outfit concepts and predicts trends.</li>
-                <li><b>VR Fitting</b> – Designers and users test fit, drape and movement in VR.</li>
-                <li><b>Digital to Physical</b> – 3D models are converted into precise 2D patterns.</li>
-                <li><b>Real Fit</b> – A physical garment is produced that matches the tuned virtual fit.</li>
+            <ol style='font-size:13px; color:#f5f5f5; padding-left:18px;'>
+                <li><b>AI Design</b> – AI generates 3D outfit concepts and trend-aligned styles.</li>
+                <li><b>VR Fitting</b> – Fit, drape and movement are tested on a virtual avatar.</li>
+                <li><b>Digital to Physical</b> – 3D garments are converted into accurate 2D patterns.</li>
+                <li><b>Real Fit</b> – Final garments match the tuned virtual fit with minimal waste.</li>
             </ol>
-            <p style='font-size:13px;'>
-            The promise: <b>Creative Freedom + Perfect Fit + Near Zero-Waste.</b>
+            <p style='font-size:13px; color:#f5f5f5;'>
+            The promise: <b>Creative Freedom + Perfect Fit + Near Zero-Waste</b>.
             </p>
         </div>
         """, unsafe_allow_html=True)
@@ -158,12 +158,12 @@ if page == "🏠 Home":
 ##############################################
 # COMPANY INFO PAGE
 ##############################################
-if page == "🏢 Company Info":
-    st.header("🏢 AI–VR Fashion Platform – Company Profile")
+if page == "🏢 Meta Fashion Info":
+    st.header("🏢 Meta Fashion – Company Profile")
 
     st.subheader("1. Business Concept")
     st.markdown("""
-    The AI–VR Fashion Platform is designed to convert a customer's or designer's idea  
+    **Meta Fashion** is an AI–VR powered fashion brand that converts a customer's or designer's idea  
     into a **real, perfectly fitted garment** using a fully digital pipeline.
     Instead of relying on multiple physical samples, fit trials, and guesswork, the
     system uses AI and VR to validate designs before a single piece of fabric is cut.
@@ -194,7 +194,7 @@ if page == "🏢 Company Info":
 
     st.subheader("3. Why This Is Useful")
     st.markdown("""
-    The platform directly addresses three major pain points in fashion:
+    Meta Fashion directly addresses three major pain points in fashion:
 
     - **Unlimited Creativity & Customisation**  
       Fashion-conscious, creative customers can convert their ideas into custom outfits
@@ -211,7 +211,7 @@ if page == "🏢 Company Info":
 
     st.subheader("4. Unique Selling Proposition (USP)")
     st.markdown("""
-    The USP combines:
+    Meta Fashion's USP combines:
     - **Creative Freedom** – customers and designers co-create unique looks.  
     - **Perfect Fit Guarantee** – fit is tested and tuned digitally before production.  
     - **True Digital-First Production** – the 3D model is directly converted into a
@@ -220,7 +220,7 @@ if page == "🏢 Company Info":
 
     st.subheader("5. Target Market & Key Personas")
     st.markdown("""
-    Based on the survey and persona analysis, we focus on three primary personas:
+    Based on the survey and persona analysis, Meta Fashion focuses on three primary personas:
 
     - **Fit Frustrated (Prime Target)**  
       - High importance of fit, high difficulty in finding the right fit.  
@@ -248,7 +248,7 @@ if page == "🏢 Company Info":
 
     st.subheader("7. Why This Is a Strong Data Analytics Project")
     st.markdown("""
-    The entire business model runs on data-driven decision making:
+    The entire Meta Fashion model runs on data-driven decision making:
 
     - **AI Design Data** – trends, style choices, and creative preferences feed into
       models that refine design suggestions.  
@@ -260,14 +260,14 @@ if page == "🏢 Company Info":
       feature preference, and persona type help decide which segments and products to
       prioritise.
 
-    This is why the platform is an ideal use case for **classification, clustering,
+    This is why Meta Fashion is an ideal use case for **classification, clustering,
     association rule mining, and regression** to guide strategy, pricing, product
     design, and rollout.
     """)
 
     st.subheader("8. Role of This Dashboard")
     st.markdown("""
-    This Streamlit dashboard acts as a **decision cockpit** for the AI–VR Fashion Platform:
+    This Streamlit dashboard acts as a **decision cockpit** for Meta Fashion:
 
     - Segments users (clustering)  
     - Predicts interest or adoption (classification)  
@@ -343,7 +343,7 @@ if page == "🤖 Classification":
         elif model_choice == "Random Forest Classifier":
             model = RandomForestClassifier(n_estimators=200, random_state=42)
         else:
-            model = XGBoostClassifier(
+            model = XGBClassifier(
                 eval_metric="logloss",
                 use_label_encoder=False,
                 random_state=42
@@ -537,7 +537,7 @@ if page == "📈 Regression":
 ##############################################
 if page == "💰 Dynamic Pricing":
 
-    st.header("💰 Dynamic Pricing Simulator")
+    st.header("💰 Dynamic Pricing Simulator – Meta Fashion")
 
     cost = st.slider("Product Cost ($)", 10, 300, 60)
     base_margin = st.slider("Base Margin (%)", 5, 80, 30)
@@ -559,7 +559,7 @@ if page == "💰 Dynamic Pricing":
 ##############################################
 if page == "🧬 Persona Generator":
 
-    st.header("🧬 AI–VR Persona Generator")
+    st.header("🧬 Meta Fashion Persona Generator")
 
     fit_score = st.slider("Fit Importance (1–10)", 1, 10, 5)
     tech_score = st.slider("Tech Comfort (1–10)", 1, 10, 5)
@@ -580,78 +580,66 @@ if page == "🧬 Persona Generator":
     st.success(f"🎭 **Your Predicted Persona: {persona}**")
 
 ##############################################
-# INSIGHTS PAGE (ALIGNED TO REPORT)
+# INSIGHTS PAGE (ALIGNED TO META FASHION)
 ##############################################
 if page == "📌 Insights":
 
-    st.header("📌 Key Insights from AI–VR Fashion Survey")
+    st.header("📌 Key Insights for Meta Fashion")
 
     st.subheader("1. Persona Distribution & Interest")
     st.markdown("""
     - The largest persona groups are **Budget Conscious**, **Premium Perfectionist**, and **Fit Frustrated**.  
-    - **Eco Warrior** and **Metaverse Native** are smaller but still meaningful segments.  
+    - **Metaverse Natives** and **Eco Warriors** are smaller but highly strategic segments.  
     - Metaverse Natives show the highest share of early adopters, while Fit Frustrated show very high overall interest, 
-      strongly supporting the idea of solving fit problems with AI–VR.
+      strongly supporting Meta Fashion’s focus on solving fit problems with AI–VR.
     """)
 
-    st.subheader("2. Fit Importance vs Difficulty (Quadrant Insight)")
+    st.subheader("2. Fit Importance vs Difficulty (Prime Target)")
     st.markdown("""
-    - Customers who rate fit as **very important and very difficult** are the **Prime Target**.  
-    - Many of these Prime Target users are also **extremely interested** in the concept.  
-    - Customers for whom fit is easy or not very important are lower priority segments for early rollout.
+    - Customers who rate fit as **very important and very difficult** form the **Prime Target** segment.  
+    - Many of these customers are highly interested in the concept of Meta Fashion.  
+    - Customers with low fit difficulty or low fit importance are secondary segments, not immediate focus.
     """)
 
-    st.subheader("3. Feature Preference – Heatmap Learnings")
+    st.subheader("3. Feature Preference – What Customers Want")
     st.markdown("""
-    - **Custom Fit Guarantee** is the most attractive feature overall, especially for Eco Warriors, 
-      Fit Frustrated and Premium Perfectionists.  
-    - **AI Design Suggestions** and **VR Try-On** are highly valued by Metaverse Natives and Premium Perfectionists.  
-    - Budget Conscious users score features lower on average, signalling price sensitivity.
+    - **Custom Fit Guarantee** is the strongest feature across segments, especially for Fit Frustrated,  
+      Eco Warriors and Premium Perfectionists.  
+    - **AI Design Suggestions** and **VR Try-On** resonate strongly with Metaverse Natives and Premium Perfectionists.  
+    - Budget Conscious users rate most features lower, signalling that they need value-focused or basic offerings.
     """)
 
-    st.subheader("4. Willingness to Pay by Persona")
+    st.subheader("4. Willingness to Pay by Persona & Category")
     st.markdown("""
-    - Across categories, people are willing to pay much more for **Suits/Blazers** than for basic items.  
-    - **Premium Perfectionist** and **Fit Frustrated** are willing to pay the highest amounts for suits/blazers 
-      (extending into the very high-price range).  
-    - **Budget Conscious** prefer lower price points, especially for premium items, indicating they are not the 
-      core target for top-tier offerings.
+    - Highest willingness to pay appears in **Suits/Blazers** – a natural first category for Meta Fashion.  
+    - **Premium Perfectionist** and **Fit Frustrated** are willing to pay the most for these premium categories.  
+    - Budget Conscious users lean towards lower price brackets, so they are not the primary target for high-end offerings.
     """)
 
-    st.subheader("5. Customer Journey Funnel")
+    st.subheader("5. Customer Journey Insights")
     st.markdown("""
-    - A large share of respondents report **fit issues** and are **tech comfortable**, validating the problem and 
-      feasibility of a tech-based solution.  
-    - A high fraction of tech-comfortable users are **curious about the concept**.  
-    - Almost half of interested customers are **willing to pay a premium**, and a significant subset want **beta access**, 
-      indicating a strong early adopter pool.
+    - A high proportion of respondents report **fit issues**, validating the problem Meta Fashion wants to solve.  
+    - A strong share of customers is **tech comfortable**, making AI–VR a viable interface.  
+    - A meaningful portion of interested users is willing to pay more and wants **early access**, showing a real early adopter base.
     """)
 
-    st.subheader("6. Purchase Factor Impact on Interest")
+    st.subheader("6. Strategic Recommendations for Meta Fashion")
     st.markdown("""
-    - Positive drivers of interest: **Unique Custom Designs**, **Perfect Fit**, **Made-to-Order/Personalisation**, 
-      and elements like sustainability and ethical manufacturing.  
-    - The strongest negative driver is **Price/Value concern**: if the product feels too expensive, interest drops.  
-    - Comfort, durability, and versatility also slightly reduce interest where customers fear a 'digital' process 
-      might compromise these aspects.
-    """)
-
-    st.subheader("7. Strategic Takeaways")
-    st.markdown("""
-    - **Primary Targets:**  
-      - Fit Frustrated (pain-driven)  
-      - Premium Perfectionist (willing to pay)  
-      - Metaverse Native (tech excitement & advocacy)  
+    - **Primary Target Segments:**  
+      - Fit Frustrated (pain-driven, fit-first)  
+      - Premium Perfectionist (quality & premium experience)  
+      - Metaverse Native (tech enthusiasm and viral potential)  
 
     - **Product Focus:**  
-      - High-impact categories like **Suits/Blazers** with a strong **Custom Fit Guarantee**.  
+      - Launch Meta Fashion with **Suits/Blazers** and other fit-critical categories.  
+      - Emphasise **Custom Fit Guarantee + AI Design + VR Try-On** as the core bundle.
 
-    - **Positioning:**  
-      - Lead with Personalized Fit + Unique Design + Zero-Waste Story.  
-      - Justify premium pricing by clearly explaining the value and long-term benefits.  
+    - **Positioning & Pricing:**  
+      - Justify higher prices by emphasising perfect fit, unique designs, and sustainability.  
+      - Use dynamic pricing experiments to find a sweet spot for each persona.
 
-    - **Risk Area:**  
-      - Budget Conscious segment remains price sensitive; they may need stripped-down offerings or basic tiers.
+    - **Risk/Watch-Out:**  
+      - Budget Conscious segment is highly price sensitive; consider a simpler, more affordable path for them later.
     """)
 
 ##############################################
@@ -659,6 +647,6 @@ if page == "📌 Insights":
 ##############################################
 st.markdown("---")
 st.markdown(
-    "<p style='text-align:center; color:gray;'>AI–VR Fashion ML Suite • Built with Streamlit</p>",
+    "<p style='text-align:center; color:gray;'>Meta Fashion • AI–VR Fashion Intelligence Suite • Built with Streamlit</p>",
     unsafe_allow_html=True
 )
