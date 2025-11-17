@@ -1,220 +1,414 @@
-# app.py
+##############################################
+#        AI–VR FASHION INTELLIGENCE SUITE
+#                FINAL app.py
+##############################################
+
 import streamlit as st
 import pandas as pd
+import numpy as np
 import plotly.express as px
 import plotly.graph_objects as go
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import (
+    accuracy_score, precision_score, recall_score, f1_score,
+    confusion_matrix, mean_squared_error, r2_score, mean_absolute_error
+)
+from sklearn.preprocessing import StandardScaler
+from sklearn.linear_model import LogisticRegression, LinearRegression
+from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor, GradientBoostingRegressor
+from sklearn.cluster import KMeans, AgglomerativeClustering
+from sklearn.decomposition import PCA
+from mlxtend.frequent_patterns import apriori, association_rules
+from xgboost import XGBClassifier, XGBRegressor
+import matplotlib.pyplot as plt
 
-st.set_page_config(page_title="AI–VR Fashion Analytics", layout="wide")
-
-@st.cache_data
-def load_data():
-    df = pd.read_csv("AI_VR_Fashion_Survey_Synthetic_Data (1).csv")
-    return df
-
-df = load_data()
-
-# Map canonical interest strings to an ordinal score (safe handling)
-interest_map = {
-    "Not interested - I prefer traditional shopping": 1,
-    "Slightly interested - I might try it eventually": 2,
-    "Moderately interested - I'd consider it": 3,
-    "Very interested - I'd definitely try it": 4,
-    "Extremely interested - I'd be an early adopter": 5
+##############################################
+# PREMIUM GRADIENT THEME CSS
+##############################################
+GRADIENT_STYLE = """
+<style>
+body {
+    background: linear-gradient(135deg, #1c1c29 0%, #202040 50%, #1a1a2e 100%);
+    color: white !important;
 }
-df["InterestScore"] = df["Q24_InterestLevel"].map(interest_map)
+.sidebar .sidebar-content {
+    background-color: #1b1b2f !important;
+}
+</style>
+"""
 
-st.sidebar.title("AI–VR Fashion — Dashboard")
-st.sidebar.caption("Interactive analytics for the AI+VR fashion concept")
-view = st.sidebar.radio(
-    "Choose view",
+st.markdown(GRADIENT_STYLE, unsafe_allow_html=True)
+
+##############################################
+# DOWNLOAD BUTTON UTILITY
+##############################################
+def download_button(df, filename):
+    csv = df.to_csv(index=False).encode()
+    st.download_button(
+        label=f"📥 Download {filename}",
+        data=csv,
+        file_name=filename,
+        mime="text/csv"
+    )
+
+##############################################
+# DATA LOADERS (UPLOAD + GITHUB)
+##############################################
+@st.cache_data
+def load_default_data():
+    # TODO: Replace with your real GitHub raw CSV URL
+    url = "https://raw.githubusercontent.com/YOUR_GITHUB_USERNAME/YOUR_REPO/main/dataset.csv"
+    try:
+        return pd.read_csv(url)
+    except:
+        return pd.DataFrame()
+
+st.sidebar.header("📁 Dataset Loader")
+
+uploaded = st.sidebar.file_uploader("Upload your CSV", type=["csv"])
+
+if uploaded:
+    df = pd.read_csv(uploaded)
+else:
+    df = load_default_data()
+
+if df.empty:
+    st.error("❌ No dataset available. Upload a CSV file or configure the GitHub URL in load_default_data().")
+    st.stop()
+
+##############################################
+# NAVIGATION
+##############################################
+page = st.sidebar.radio(
+    "Navigate",
     [
-        "Overview & KPIs",
-        "Customer Personas & Interest",
-        "Fit Importance vs Difficulty",
-        "Purchase Factors vs Interest",
-        "Feature Interest Heatmap",
-        "Willingness to Pay (Suits / Blazers)",
-        "Customer Journey Funnel",
-        "Executive Summary"
-    ],
-    index=0
+        "🏠 Home",
+        "📊 Data Overview",
+        "🤖 Classification",
+        "🌀 Clustering",
+        "🔗 Association Rule Mining",
+        "📈 Regression",
+        "💰 Dynamic Pricing",
+        "🧬 Persona Generator",
+        "📌 Insights"
+    ]
 )
 
-if view == "Overview & KPIs":
-    st.title("Overview & Key Metrics")
-    st.write("""
-    Summary of a 600-respondent survey on an AI+VR fashion platform (virtual try-on, AI design suggestions,
-    custom fit guarantee).
+##############################################
+# HOME PAGE
+##############################################
+if page == "🏠 Home":
+    st.markdown("""
+        <div style='text-align:center; padding:40px;
+            background:linear-gradient(90deg,#A020F0,#00C9FF);
+            border-radius:15px; color:white;'>
+            <h1 style='font-size:50px;'>AI–VR Fashion Intelligence Suite</h1>
+            <h3>The Ultimate All-in-One ML + Pricing + Persona Dashboard</h3>
+        </div>
+    """, unsafe_allow_html=True)
+
+    st.write("")
+    st.markdown("### 🚀 What This Dashboard Includes")
+    st.markdown("""
+    - ✔ Classification (LR, RF, XGBoost)  
+    - ✔ Clustering (KMeans, Hierarchical)  
+    - ✔ Association Rule Mining (Apriori)  
+    - ✔ Regression (LR, RF, GBR, XGBRegressor)  
+    - ✔ Dynamic Pricing Simulator  
+    - ✔ Persona Generator  
+    - ✔ Insights + Strategies  
+    - ✔ Data Upload + Download  
     """)
-    total = len(df)
-    early_adopters = int((df["Q24_InterestLevel"] == "Extremely interested - I'd be an early adopter").sum())
-    tech_positive = int(df["Q15_TechComfort"].isin([
-        "Comfortable - I adopt new tech fairly quickly",
-        "Early adopter - I'm usually first to try new tech"
-    ]).sum())
-    prime_target = int(((df["Q12_FitImportance"] >= 7) & (df["Q13_FitDifficulty"] >= 6)).sum())
 
-    c1, c2, c3, c4 = st.columns(4)
-    c1.metric("Total respondents", f"{total}")
-    c2.metric("Early adopters", f"{early_adopters}", f"{early_adopters/total:.0%}")
-    c3.metric("Tech-comfortable users", f"{tech_positive}", f"{tech_positive/total:.0%}")
-    c4.metric("Prime target (fit-critical)", f"{prime_target}", f"{prime_target/total:.0%}")
+    st.markdown("---")
 
-    st.subheader("Persona distribution")
-    persona_counts = df["Persona"].value_counts().reset_index()
-    persona_counts.columns = ["Persona", "Count"]
-    fig = px.pie(persona_counts, names="Persona", values="Count", hole=0.35)
-    st.plotly_chart(fig, use_container_width=True)
+##############################################
+# DATA OVERVIEW
+##############################################
+if page == "📊 Data Overview":
 
-    st.subheader("Interest level distribution")
-    fig2 = px.histogram(df, x="Q24_InterestLevel",
-                        category_orders={"Q24_InterestLevel": list(interest_map.keys())})
-    fig2.update_layout(xaxis_title="Interest level", yaxis_title="Respondents")
-    st.plotly_chart(fig2, use_container_width=True)
+    st.header("📊 Dataset Overview")
 
-elif view == "Customer Personas & Interest":
-    st.title("Customer Personas & Interest")
-    st.write("Stacked view of interest levels by persona (who are the likely early adopters).")
-    fig = px.histogram(
-        df,
-        x="Persona",
-        color="Q24_InterestLevel",
-        barmode="stack",
-        category_orders={"Q24_InterestLevel": list(interest_map.keys())}
+    st.subheader("Preview Data")
+    st.dataframe(df.head())
+
+    st.subheader("Shape")
+    st.write(df.shape)
+
+    st.subheader("Missing Values")
+    st.write(df.isnull().sum())
+
+    st.subheader("Summary Stats")
+    st.write(df.describe(include="all"))
+
+    st.subheader("📥 Download Dataset")
+    download_button(df, "dataset_download.csv")
+
+##############################################
+# CLASSIFICATION
+##############################################
+if page == "🤖 Classification":
+
+    st.header("🤖 Classification Models")
+
+    target = st.selectbox("Target Column", df.columns)
+    features = st.multiselect("Feature Columns", df.columns, default=list(df.columns))
+
+    if target in features:
+        features.remove(target)
+
+    model_choice = st.selectbox("Choose Algorithm", [
+        "Logistic Regression",
+        "Random Forest Classifier",
+        "XGBoost Classifier"
+    ])
+
+    test_size = st.slider("Test Split %", 0.1, 0.5, 0.2)
+
+    if st.button("Train Model"):
+
+        X = pd.get_dummies(df[features])
+        y = df[target]
+
+        X_train, X_test, y_train, y_test = train_test_split(
+            X, y, test_size=test_size, random_state=42
+        )
+
+        if model_choice == "Logistic Regression":
+            model = LogisticRegression(max_iter=500)
+        elif model_choice == "Random Forest Classifier":
+            model = RandomForestClassifier(n_estimators=200, random_state=42)
+        else:
+            model = XGBClassifier(
+                eval_metric="logloss",
+                use_label_encoder=False,
+                random_state=42
+            )
+
+        model.fit(X_train, y_train)
+        preds = model.predict(X_test)
+
+        st.subheader("📊 Classification Metrics")
+        st.write("Accuracy:", accuracy_score(y_test, preds))
+        st.write("Precision:", precision_score(y_test, preds, average="weighted", zero_division=0))
+        st.write("Recall:", recall_score(y_test, preds, average="weighted", zero_division=0))
+        st.write("F1 Score:", f1_score(y_test, preds, average="weighted", zero_division=0))
+
+        cm = confusion_matrix(y_test, preds)
+        st.subheader("Confusion Matrix")
+        st.write(cm)
+
+        out = pd.DataFrame({"Actual": y_test, "Predicted": preds})
+        download_button(out, "classification_predictions.csv")
+
+##############################################
+# CLUSTERING
+##############################################
+if page == "🌀 Clustering":
+
+    st.header("🌀 Clustering Models")
+
+    num_clusters = st.slider("Number of Clusters (KMeans)", 2, 10, 3)
+    method = st.selectbox("Clustering Method", ["KMeans", "Agglomerative"])
+
+    clustering_features = st.multiselect(
+        "Select features for clustering",
+        df.columns,
+        default=list(df.select_dtypes(include=[np.number]).columns)
     )
-    fig.update_layout(xaxis_title="Persona", yaxis_title="Respondents", legend_title="Interest")
-    st.plotly_chart(fig, use_container_width=True)
-    st.markdown("""
-    **Insights**
-    - Metaverse Natives & Premium Perfectionists: highest 'Very'/'Extremely interested' shares.
-    - Fit Frustrated: strong interest — good practical target.
-    - Budget Conscious: more price-sensitive (lower extreme-interest share).
-    """)
 
-elif view == "Fit Importance vs Difficulty":
-    st.title("Fit Importance vs Fit Difficulty – Quadrant")
-    st.write("Top-right quadrant = high importance and high difficulty (prime target).")
-    fig = px.scatter(
-        df, x="Q12_FitImportance", y="Q13_FitDifficulty",
-        color="Q24_InterestLevel",
-        hover_data=["Persona", "Q8_AnnualSpend"],
-        category_orders={"Q24_InterestLevel": list(interest_map.keys())}
+    if st.button("Run Clustering"):
+
+        X = df[clustering_features].dropna()
+        scaler = StandardScaler()
+        X_scaled = scaler.fit_transform(X)
+
+        if method == "KMeans":
+            model = KMeans(n_clusters=num_clusters, random_state=42)
+        else:
+            model = AgglomerativeClustering(n_clusters=num_clusters)
+
+        df["Cluster"] = model.fit_predict(X_scaled)
+
+        st.subheader("Cluster Assigned Data")
+        st.dataframe(df.head())
+
+        # PCA 2D Visualization
+        pca = PCA(n_components=2)
+        comps = pca.fit_transform(X_scaled)
+        df["PC1"], df["PC2"] = comps[:, 0], comps[:, 1]
+
+        st.subheader("2D Cluster Visualization")
+        fig = px.scatter(df, x="PC1", y="PC2", color="Cluster", hover_data=clustering_features)
+        st.plotly_chart(fig, use_container_width=True)
+
+        download_button(df, "clustered_data.csv")
+
+##############################################
+# ASSOCIATION RULE MINING
+##############################################
+if page == "🔗 Association Rule Mining":
+
+    st.header("🔗 Association Rule Mining — Apriori Algorithm")
+
+    categorical_cols = st.multiselect(
+        "Select Categorical Columns",
+        df.columns,
+        default=[col for col in df.columns if df[col].dtype == "object"]
     )
-    fig.add_shape(type="line", x0=7, x1=7, y0=df["Q13_FitDifficulty"].min(), y1=df["Q13_FitDifficulty"].max(),
-                  line=dict(dash="dash"))
-    fig.add_shape(type="line", x0=df["Q12_FitImportance"].min(), x1=df["Q12_FitImportance"].max(), y0=6, y1=6,
-                  line=dict(dash="dash"))
-    fig.update_layout(xaxis_title="Fit importance (1–10)", yaxis_title="Fit difficulty (1–10)")
-    st.plotly_chart(fig, use_container_width=True)
-    prime_share = ((df["Q12_FitImportance"] >= 7) & (df["Q13_FitDifficulty"] >= 6)).mean()
-    st.write(f"**About {prime_share:.0%}** of respondents are in the prime target quadrant.")
 
-elif view == "Purchase Factors vs Interest":
-    st.title("Purchase Factors vs Interest (correlation)")
-    st.write("Correlation between Q17_* purchase factors and InterestScore (1–5). Positive = higher interest.")
-    factor_cols = [c for c in df.columns if c.startswith("Q17_")]
-    corr_list = []
-    for c in factor_cols:
-        try:
-            corr = df["InterestScore"].corr(df[c])
-            corr_list.append({"factor": c, "corr": float(corr) if pd.notna(corr) else 0.0})
-        except Exception:
-            corr_list.append({"factor": c, "corr": 0.0})
-    corr_df = pd.DataFrame(corr_list).sort_values("corr", ascending=True)
-    label_map = {
-        "Q17_Price_Value": "Price / Value",
-        "Q17_Perfectfit": "Perfect Fit",
-        "Q17_Brandreputation": "Brand Reputation",
-        "Q17_Sustainability_ecofriendliness": "Sustainability / Eco-friendliness",
-        "Q17_Unique_customdesigns": "Unique Custom Designs",
-        "Q17_Latesttrends": "Latest Trends",
-        "Q17_Comfort": "Comfort",
-        "Q17_Quality_durability": "Quality / Durability",
-        "Q17_Fastdelivery": "Fast Delivery",
-        "Q17_Easyreturns": "Easy Returns",
-        "Q17_Ethicalmanufacturing": "Ethical Manufacturing",
-        "Q17_Celebrity_influencerendorsements": "Celebrity / Influencer",
-        "Q17_Versatility_multiuse": "Versatility / Multi-use",
-        "Q17_Madetoorder_personalization": "Made-to-order Personalization"
-    }
-    corr_df["label"] = corr_df["factor"].map(label_map).fillna(corr_df["factor"])
-    fig = px.bar(corr_df, x="corr", y="label", orientation="h")
-    fig.update_layout(xaxis_title="Correlation with interest", yaxis_title="")
-    st.plotly_chart(fig, use_container_width=True)
-    st.markdown("""
-    - Perfect fit & personalization: strongest positive drivers.
-    - Price / value: strongest negative driver — pricing must be tested.
-    """)
+    min_support = st.slider("Min Support", 0.01, 0.5, 0.05)
+    min_conf = st.slider("Min Confidence", 0.1, 1.0, 0.5)
+    min_lift = st.slider("Min Lift", 0.5, 5.0, 1.0)
 
-elif view == "Feature Interest Heatmap":
-    st.title("Feature Interest Heatmap by Persona")
-    st.write("Average persona ratings (1–5) for key platform features.")
-    feature_cols = [
-        "Q23_AIgenerateddesignsuggestions",
-        "Q23_VirtualtryoninVR",
-        "Q23_Customfitguarantee",
-        "Q23_Zerowasteproduction",
-        "Q23_Digitalwardrobemanagement",
-        "Q23_DesignyourownclotheswithAI"
-    ]
-    existing = [c for c in feature_cols if c in df.columns]
-    if not existing:
-        st.error("No matching feature columns found in the dataset.")
-    else:
-        heat = df.groupby("Persona")[existing].mean().T
-        rename = {
-            "Q23_AIgenerateddesignsuggestions": "AI design suggestions",
-            "Q23_VirtualtryoninVR": "VR try-on",
-            "Q23_Customfitguarantee": "Custom fit guarantee",
-            "Q23_Zerowasteproduction": "Zero-waste production",
-            "Q23_Digitalwardrobemanagement": "Digital wardrobe",
-            "Q23_DesignyourownclotheswithAI": "Design with AI"
-        }
-        heat = heat.rename(columns=rename)
-        fig = px.imshow(heat, labels=dict(x="Persona", y="Feature", color="Average rating"))
-        st.plotly_chart(fig, use_container_width=True)
-        st.markdown("Metaverse Natives and Premium Perfectionists show relatively higher interest in advanced features.")
+    if st.button("Generate Rules"):
 
-elif view == "Willingness to Pay (Suits / Blazers)":
-    st.title("Willingness to Pay — Suits / Blazers")
-    st.write("Distribution of reported willingness to pay by persona (violin plot).")
-    if "Q27_SuitPrice" not in df.columns:
-        st.error("Q27_SuitPrice column not found in dataset.")
-    else:
-        fig = px.violin(df, x="Persona", y="Q27_SuitPrice", box=True, points="all")
-        fig.update_layout(xaxis_title="Persona", yaxis_title="Willingness to pay (suit/blazer)")
+        if not categorical_cols:
+            st.error("Please select at least one categorical column.")
+        else:
+            df_hot = pd.get_dummies(df[categorical_cols])
+
+            freq_items = apriori(df_hot, min_support=min_support, use_colnames=True)
+            rules = association_rules(freq_items, metric="confidence", min_threshold=min_conf)
+            rules = rules[rules["lift"] >= min_lift]
+
+            st.subheader("Generated Rules")
+            if rules.empty:
+                st.warning("No rules found with the selected thresholds.")
+            else:
+                st.dataframe(rules)
+
+                download_button(rules, "association_rules.csv")
+
+##############################################
+# REGRESSION
+##############################################
+if page == "📈 Regression":
+
+    st.header("📈 Regression Models")
+
+    target = st.selectbox("Target (Y)", df.columns)
+    reg_features = st.multiselect("Features (X)", df.columns, default=list(df.columns))
+
+    if target in reg_features:
+        reg_features.remove(target)
+
+    reg_model_choice = st.selectbox(
+        "Select Regression Algorithm",
+        ["Linear Regression", "Random Forest Regressor",
+         "Gradient Boosting Regressor", "XGBoost Regressor"]
+    )
+
+    test_size = st.slider("Test Size (%)", 0.1, 0.5, 0.2)
+
+    if st.button("Run Regression"):
+
+        X = pd.get_dummies(df[reg_features])
+        y = df[target]
+
+        X_train, X_test, y_train, y_test = train_test_split(
+            X, y, test_size=test_size, random_state=42
+        )
+
+        if reg_model_choice == "Linear Regression":
+            model = LinearRegression()
+        elif reg_model_choice == "Random Forest Regressor":
+            model = RandomForestRegressor(n_estimators=300, random_state=42)
+        elif reg_model_choice == "Gradient Boosting Regressor":
+            model = GradientBoostingRegressor(random_state=42)
+        else:
+            model = XGBRegressor(objective="reg:squarederror", random_state=42)
+
+        model.fit(X_train, y_train)
+        preds = model.predict(X_test)
+
+        st.subheader("Regression Metrics")
+        st.write("R²:", r2_score(y_test, preds))
+        st.write("RMSE:", np.sqrt(mean_squared_error(y_test, preds)))
+        st.write("MAE:", mean_absolute_error(y_test, preds))
+
+        fig = px.scatter(
+            x=y_test, y=preds,
+            labels={"x": "Actual", "y": "Predicted"},
+            trendline="ols"
+        )
         st.plotly_chart(fig, use_container_width=True)
 
-elif view == "Customer Journey Funnel":
-    st.title("Customer Journey Funnel")
-    st.write("Rough funnel: Awareness → Interested → Beta sign-ups → Willing to pay.")
-    aware = len(df)
-    interested = int((df["InterestScore"] >= 3).sum())
-    beta = int((df["Q37_BetaTestInterest"] == "Yes").sum()) if "Q37_BetaTestInterest" in df.columns else int((df["InterestScore"] >= 4).sum() * 0.25)
-    willing_pay = int((df["InterestScore"] >= 4).sum())
-    funnel_df = pd.DataFrame({
-        "stage": ["Awareness", "Interested (3+)", "Beta sign-ups (est)", "Willing to pay (4+)"],
-        "count": [aware, interested, beta, willing_pay]
-    })
-    fig = px.funnel(funnel_df, x="count", y="stage")
+        out = pd.DataFrame({"Actual": y_test, "Predicted": preds})
+        download_button(out, "regression_predictions.csv")
+
+##############################################
+# DYNAMIC PRICING
+##############################################
+if page == "💰 Dynamic Pricing":
+
+    st.header("💰 Dynamic Pricing Simulator")
+
+    cost = st.slider("Product Cost ($)", 10, 300, 60)
+    base_margin = st.slider("Base Margin (%)", 5, 80, 30)
+    persona_factor = st.slider("Persona Multiplier (%)", 80, 150, 100)
+    features_addon = st.slider("AI Feature Add-on ($)", 0, 200, 50)
+
+    dynamic_price = cost * (1 + base_margin / 100) * (persona_factor / 100) + features_addon
+
+    st.success(f"💲 **Recommended Dynamic Price: ${dynamic_price:.2f}**")
+
+    units = np.arange(10, 201, 10)
+    revenue = units * dynamic_price
+
+    fig = px.line(x=units, y=revenue, labels={"x": "Units Sold", "y": "Revenue ($)"})
     st.plotly_chart(fig, use_container_width=True)
 
-elif view == "Executive Summary":
-    st.title("Executive summary & recommended next steps")
+##############################################
+# PERSONA GENERATOR
+##############################################
+if page == "🧬 Persona Generator":
+
+    st.header("🧬 AI–VR Persona Generator")
+
+    fit_score = st.slider("Fit Importance (1–10)", 1, 10, 5)
+    tech_score = st.slider("Tech Comfort (1–10)", 1, 10, 5)
+    budget = st.slider("Budget Level (1–5)", 1, 5, 3)
+    trendiness = st.slider("Trend Affinity (1–10)", 1, 10, 5)
+
+    if fit_score >= 8 and tech_score >= 7:
+        persona = "Premium Perfectionist"
+    elif fit_score >= 7 and budget <= 3:
+        persona = "Fit Frustrated"
+    elif tech_score >= 8 and trendiness >= 7:
+        persona = "Metaverse Native"
+    elif budget == 1:
+        persona = "Budget Conscious"
+    else:
+        persona = "Eco Warrior"
+
+    st.success(f"🎭 **Your Predicted Persona: {persona}**")
+
+##############################################
+# INSIGHTS PAGE
+##############################################
+if page == "📌 Insights":
+
+    st.header("📌 AI-Generated Insights & Strategy Recommendations")
+
+    st.info("🔥 Target high WTP personas with premium AI–VR bundles.")
+    st.warning("⚠ Budget Conscious personas show weaker interest — avoid early targeting.")
+    st.success("✨ Metaverse Natives are ideal early adopters for immersive VR try-on.")
+
+    st.subheader("📌 Recommended Go-To-Market Strategy")
     st.markdown("""
-    **Top insights**
-    - Strong interest: large majority are moderately to extremely interested.
-    - Best early segments: Metaverse Natives, Premium Perfectionists, Fit Frustrated.
-    - Barrier: Price/value concerns — pricing & packaging need tests.
-    - Feature priorities: Perfect fit, personalization, VR try-on, AI design suggestions.
-
-    **Recommended next steps**
-    1. Run a paid beta focusing on suits/blazers for Premium and Fit Frustrated segments.
-    2. A/B test pricing and include a Fit Guarantee to reduce friction.
-    3. Collect digital→physical fit delta metrics to quantify accuracy.
-    4. Use classification to prioritize outreach to high-conversion respondents.
+    - Focus on **Premium Perfectionists** & **Metaverse Natives**  
+    - Lead with **VR Try-On + AI Fit Suggestions**  
+    - Build **sustainability and zero-waste stories** for Eco Warriors  
+    - Avoid heavy marketing spend on Budget Conscious personas initially  
+    - Offer tiered pricing with dynamic add-ons for advanced features  
     """)
-    st.markdown("Deploy: push to GitHub and deploy on Streamlit Cloud (or Heroku).")
 
-else:
-    st.write("Select a view from the sidebar.")
+##############################################
+# FOOTER
+##############################################
+st.markdown("---")
+st.markdown(
+    "<p style='text-align:center; color:gray;'>AI–VR Fashion ML Suite • Built with Streamlit</p>",
+    unsafe_allow_html=True
+)
